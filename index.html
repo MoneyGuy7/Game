@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mini Game Website</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #111;
+      color: #fff;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    #buttons button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      border: none;
+      background-color: crimson;
+      color: white;
+      border-radius: 5px;
+    }
+
+    .game-container {
+      display: none;
+      margin-top: 30px;
+      background: #fff;
+      color: black;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    .active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <h1>Mini Game Website</h1>
+
+  <div id="buttons">
+    <button onclick="showGame('flappy')">Flappy Bird</button>
+    <button onclick="showGame('snake')">Snake</button>
+    <button onclick="showGame('memory')">Memory</button>
+    <button onclick="showGame('clicker')">Clicker</button>
+    <button onclick="showGame('tictactoe')">Tic-Tac-Toe</button>
+  </div>
+
+  <!-- Flappy Bird (Simple Jump Box) -->
+  <div id="flappy" class="game-container">
+    <h2>Flappy Bird (Box Jump Version)</h2>
+    <canvas id="flappyCanvas" width="300" height="400" style="background:#ddd;"></canvas>
+    <script>
+      let flappyCanvas = document.getElementById('flappyCanvas');
+      let ctxF = flappyCanvas.getContext('2d');
+      let y = 200, gravity = 1.5, jump = -20, velocity = 0;
+      document.addEventListener('keydown', () => { velocity = jump; });
+
+      function drawFlappy() {
+        ctxF.clearRect(0, 0, 300, 400);
+        velocity += gravity;
+        y += velocity;
+        if (y > 380) y = 380;
+        ctxF.fillStyle = "red";
+        ctxF.fillRect(50, y, 20, 20);
+        requestAnimationFrame(drawFlappy);
+      }
+      drawFlappy();
+    </script>
+  </div>
+
+  <!-- Snake Game -->
+  <div id="snake" class="game-container">
+    <h2>Snake Game</h2>
+    <canvas id="snakeCanvas" width="300" height="300" style="background:#222;"></canvas>
+    <script>
+      const canvasS = document.getElementById("snakeCanvas");
+      const ctxS = canvasS.getContext("2d");
+      let snake = [{x: 150, y: 150}], dx = 10, dy = 0, food = {}, score = 0;
+
+      function randomFood() {
+        food = {
+          x: Math.floor(Math.random() * 30) * 10,
+          y: Math.floor(Math.random() * 30) * 10
+        };
+      }
+
+      function drawSnake() {
+        ctxS.fillStyle = "lime";
+        snake.forEach(part => ctxS.fillRect(part.x, part.y, 10, 10));
+      }
+
+      function drawFood() {
+        ctxS.fillStyle = "red";
+        ctxS.fillRect(food.x, food.y, 10, 10);
+      }
+
+      function moveSnake() {
+        const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+        snake.unshift(head);
+        if (head.x === food.x && head.y === food.y) {
+          randomFood();
+        } else {
+          snake.pop();
+        }
+      }
+
+      function update() {
+        ctxS.clearRect(0, 0, 300, 300);
+        moveSnake();
+        drawSnake();
+        drawFood();
+        setTimeout(update, 100);
+      }
+
+      document.addEventListener("keydown", e => {
+        if (e.key === "ArrowUp") dx = 0, dy = -10;
+        if (e.key === "ArrowDown") dx = 0, dy = 10;
+        if (e.key === "ArrowLeft") dx = -10, dy = 0;
+        if (e.key === "ArrowRight") dx = 10, dy = 0;
+      });
+
+      randomFood();
+      update();
+    </script>
+  </div>
+
+  <!-- Memory Match Game -->
+  <div id="memory" class="game-container">
+    <h2>Memory Game</h2>
+    <p>Click two boxes to match colors!</p>
+    <div id="memoryBoard" style="display:grid; grid-template-columns:repeat(4, 60px); gap:10px; justify-content:center;"></div>
+    <script>
+      const colors = ["red", "blue", "green", "yellow", "purple", "orange", "cyan", "pink"];
+      let tiles = [...colors, ...colors].sort(() => 0.5 - Math.random());
+      const board = document.getElementById("memoryBoard");
+      let first, second;
+
+      tiles.forEach(color => {
+        let box = document.createElement("div");
+        box.style.width = "60px";
+        box.style.height = "60px";
+        box.style.background = "#444";
+        box.dataset.color = color;
+        box.onclick = function () {
+          if (box.style.background !== "#444" || second) return;
+          box.style.background = color;
+          if (!first) {
+            first = box;
+          } else {
+            second = box;
+            if (first.dataset.color === second.dataset.color) {
+              first = second = null;
+            } else {
+              setTimeout(() => {
+                first.style.background = "#444";
+                second.style.background = "#444";
+                first = second = null;
+              }, 500);
+            }
+          }
+        };
+        board.appendChild(box);
+      });
+    </script>
+  </div>
+
+  <!-- Clicker Game -->
+  <div id="clicker" class="game-container">
+    <h2>Clicker Game</h2>
+    <p>Clicks: <span id="clicks">0</span></p>
+    <button onclick="addClick()">Click Me!</button>
+    <script>
+      let count = 0;
+      function addClick() {
+        count++;
+        document.getElementById('clicks').innerText = count;
+      }
+    </script>
+  </div>
+
+  <!-- Tic Tac Toe -->
+  <div id="tictactoe" class="game-container">
+    <h2>Tic Tac Toe</h2>
+    <table border="1" style="margin:auto; font-size:2rem;">
+      <tr>
+        <td onclick="mark(this)"></td>
+        <td onclick="mark(this)"></td>
+        <td onclick="mark(this)"></td>
+      </tr>
+      <tr>
+        <td onclick="mark(this)"></td>
+        <td onclick="mark(this)"></td>
+        <td onclick="mark(this)"></td>
+      </tr>
+      <tr>
+        <td onclick="mark(this)"></td>
+        <td onclick="mark(this)"></td>
+        <td onclick="mark(this)"></td>
+      </tr>
+    </table>
+    <p id="winner"></p>
+    <script>
+      let turn = "X";
+      function mark(cell) {
+        if (cell.innerText === "") {
+          cell.innerText = turn;
+          turn = (turn === "X") ? "O" : "X";
+          checkWin();
+        }
+      }
+
+      function checkWin() {
+        const cells = document.querySelectorAll("td");
+        const combos = [
+          [0,1,2],[3,4,5],[6,7,8],
+          [0,3,6],[1,4,7],[2,5,8],
+          [0,4,8],[2,4,6]
+        ];
+        combos.forEach(c => {
+          const [a, b, c2] = c;
+          if (
+            cells[a].innerText &&
+            cells[a].innerText === cells[b].innerText &&
+            cells[a].innerText === cells[c2].innerText
+          ) {
+            document.getElementById("winner").innerText = `${cells[a].innerText} wins!`;
+          }
+        });
+      }
+    </script>
+  </div>
+
+  <script>
+    function showGame(id) {
+      document.querySelectorAll('.game-container').forEach(el => el.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+  </script>
+</body>
+</html>
